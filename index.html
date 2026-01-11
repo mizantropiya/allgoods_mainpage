@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>AllGoods — автоматизация продавцов маркетплейсов</title>
+  <title>AllGoods — автоматизация Wildberries</title>
 
   <style>
     :root{
@@ -37,7 +37,7 @@
       --stack-break: 560px;
     }
 
-    /* (1) максимум 2 шрифта: используем один системный стек, без импортов */
+    /* максимум 2 шрифта: используем один системный стек, без импортов */
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
@@ -200,15 +200,13 @@
     }
     section[id], main[id]{ scroll-margin-top: calc(var(--nav-h) + 18px); }
 
-    /* ========================= HERO (2) минималистично + продающе ========================= */
+    /* ========================= HERO ========================= */
     .hero{
       margin-top: 18px;
       border-radius: calc(var(--radius) + 6px);
       overflow:hidden;
       box-shadow: var(--shadow);
       border: 1px solid rgba(255,255,255,.10);
-
-      /* Обигрываем логотип: чистый фон + зелёный акцент (без “лишних” блоков) */
       background:
         radial-gradient(900px 460px at 18% 18%, rgba(39,226,138,.22), transparent 60%),
         radial-gradient(780px 420px at 88% 0%, rgba(39,226,138,.10), transparent 58%),
@@ -235,7 +233,6 @@
       gap: 14px;
     }
 
-    /* Лого — крупно и запоминается */
     .hero-logo{
       width: min(720px, 92%);
       height: auto;
@@ -243,8 +240,6 @@
       display:block;
       background: transparent;
       border-radius: 18px;
-
-      /* лёгкая “сцена” под логотип, но без дополнительных элементов */
       filter: drop-shadow(0 24px 70px rgba(0,0,0,.55));
     }
 
@@ -373,24 +368,6 @@
       align-items:center;
     }
 
-    .badges{
-      display:flex;
-      gap: 8px;
-      justify-content:flex-start;
-    }
-    .badge{
-      font-size: 13px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(12,12,18,.85);
-      color: rgba(242,243,247,.88);
-      letter-spacing:.02em;
-      white-space:nowrap;
-    }
-    .badge.wb{ border-color: rgba(149,92,255,.35); }
-    .badge.ozon{ border-color: rgba(120,180,255,.35); }
-
     .popular .card{ display:flex; flex-direction:column; }
     .popular .actions{ margin-top:auto; }
     .popular .card h3{
@@ -408,7 +385,6 @@
       min-height: calc(1.55em * 2);
       margin-bottom: 14px;
     }
-    .popular .badges{ flex-wrap:nowrap; overflow:hidden; }
 
     /* ===================== Section 3 ===================== */
     main{ margin-top: 18px; }
@@ -420,6 +396,9 @@
     }
     .market-grid .panel{ grid-column: span 6; }
     @media (max-width: 560px){ .market-grid .panel{ grid-column: span 12; } }
+
+    /* после удаления Озона WB будет один: растягиваем на всю ширину */
+    .market-grid .panel[data-market="wb"]{ grid-column: span 12; }
 
     .panel{
       border:1px solid var(--line);
@@ -443,7 +422,7 @@
       background: transparent;
       display:block;
       filter: none;
-      border-radius: 10px; /* скругление WB/Ozon */
+      border-radius: 10px;
     }
 
     .panel-title{
@@ -580,7 +559,6 @@
       min-height: calc(1.55em * 2);
       margin-bottom: 14px;
     }
-    .market-services .badges{ flex-wrap:nowrap; overflow:hidden; }
 
     footer{
       margin-top: 22px;
@@ -639,7 +617,7 @@
         <div class="hero-content">
           <img class="hero-logo" src="logo.png" alt="AllGoods" />
 
-          <h1 class="hero-h1">AllGoods — порядок в работе с WB и Ozon: <b>контроль</b>, <b>скорость</b>, <b>стабильность</b></h1>
+          <h1 class="hero-h1">AllGoods — порядок в работе с Wildberries: <b>контроль</b>, <b>скорость</b>, <b>стабильность</b></h1>
           <p class="hero-sub">Документы, остатки и подготовка поставок <b>в одном сервисе</b></p>
           <p class="hero-note"><b>Упаковочный лист</b> доступен уже сейчас — попробуйте в один клик!</p>
 
@@ -662,9 +640,6 @@
             <div class="card-head-top">
               <h3>Автоматическое создание упаковочного листа</h3>
             </div>
-            <div class="badges">
-              <span class="badge wb">WB</span>
-            </div>
           </div>
           <p>Генерация упаковочного листа из данных поставки: быстро, одинаково, без ручных правок</p>
           <div class="actions">
@@ -676,10 +651,6 @@
           <div class="card-head">
             <div class="card-head-top">
               <h3>Отслеживание остатков и пороги</h3>
-            </div>
-            <div class="badges">
-              <span class="badge wb">WB</span>
-              <span class="badge ozon">Ozon</span>
             </div>
           </div>
           <p>Пороги по SKU, уведомления, приоритет "что пополнить первым"</p>
@@ -693,9 +664,6 @@
             <div class="card-head-top">
               <h3>Планирование поставок</h3>
             </div>
-            <div class="badges">
-              <span class="badge wb">WB</span>
-            </div>
           </div>
           <p>Черновики поставок из продаж и остатков + проверка ошибок перед отправкой</p>
           <div class="actions">
@@ -708,9 +676,6 @@
             <div class="card-head-top">
               <h3>Синхронизация цен по правилам</h3>
             </div>
-            <div class="badges">
-              <span class="badge ozon">Ozon</span>
-            </div>
           </div>
           <p>Округление, минимальная маржа, защита от “прыжков” и случайных обновлений</p>
           <div class="actions">
@@ -721,7 +686,7 @@
     </section>
 
     <!-- Services by marketplace -->
-    <main id="marketplaces" aria-label="WB и Ozon — разделы и сервисы">
+    <main id="marketplaces" aria-label="Wildberries — разделы и сервисы">
       <div class="market-grid" id="marketGrid">
         <!-- WB -->
         <section class="panel" data-market="wb">
@@ -750,7 +715,6 @@
                   <article class="card">
                     <div class="card-head">
                       <div class="card-head-top"><h3>Упаковочный лист</h3></div>
-                      <div class="badges"><span class="badge wb">WB</span></div>
                     </div>
                     <p>Загрузи данные поставки — получи упаковочный лист по шаблону</p>
                     <div class="actions">
@@ -761,7 +725,6 @@
                   <article class="card">
                     <div class="card-head">
                       <div class="card-head-top"><h3>Проверка комплектации заказа</h3></div>
-                      <div class="badges"><span class="badge wb">WB</span></div>
                     </div>
                     <p>Сверка позиций по сборке: подсветка расхождений и быстрые действия</p>
                     <div class="actions">
@@ -791,7 +754,6 @@
                   <article class="card">
                     <div class="card-head">
                       <div class="card-head-top"><h3>Отслеживание остатков</h3></div>
-                      <div class="badges"><span class="badge wb">WB</span></div>
                     </div>
                     <p>Пороги по SKU и уведомления о риске OOS</p>
                     <div class="actions">
@@ -802,99 +764,6 @@
                   <article class="card">
                     <div class="card-head">
                       <div class="card-head-top"><h3>Планирование поставок</h3></div>
-                      <div class="badges"><span class="badge wb">WB</span></div>
-                    </div>
-                    <p>Черновики поставок по продажам и остаткам</p>
-                    <div class="actions">
-                      <span class="btn outline small disabled">В разработке</span>
-                    </div>
-                  </article>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- OZON -->
-        <section class="panel" data-market="ozon">
-          <div class="panel-head">
-            <img class="mp-logo" src="ozon.png" alt="Ozon" />
-            <div class="panel-title">Ozon</div>
-          </div>
-
-          <div class="panel-body" data-accordion-scope="ozon">
-            <div class="section">
-              <button class="acc-btn" type="button" data-acc="ozon-ops" aria-expanded="false">
-                <div class="acc-left">
-                  <span class="section-flag" aria-hidden="true"></span>
-                  <div class="acc-meta">
-                    <div class="acc-title">Операции</div>
-                    <div class="acc-sub">Заказы, статусы, контроль</div>
-                  </div>
-                </div>
-                <span class="chev" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-                </span>
-              </button>
-
-              <div class="acc-body" data-acc-body="ozon-ops" data-open="false">
-                <div class="market-services">
-                  <article class="card">
-                    <div class="card-head">
-                      <div class="card-head-top"><h3>Умные статусы заказов</h3></div>
-                      <div class="badges"><span class="badge ozon">Ozon</span></div>
-                    </div>
-                    <p>Фильтры по “где застряло” + список проблемных заказов</p>
-                    <div class="actions">
-                      <span class="btn outline small disabled">В разработке</span>
-                    </div>
-                  </article>
-
-                  <article class="card">
-                    <div class="card-head">
-                      <div class="card-head-top"><h3>Синхронизация цен по правилам</h3></div>
-                      <div class="badges"><span class="badge ozon">Ozon</span></div>
-                    </div>
-                    <p>Округление, минимальная маржа, защита от случайных обновлений</p>
-                    <div class="actions">
-                      <span class="btn outline small disabled">В разработке</span>
-                    </div>
-                  </article>
-                </div>
-              </div>
-            </div>
-
-            <div class="section">
-              <button class="acc-btn" type="button" data-acc="ozon-stock" aria-expanded="false">
-                <div class="acc-left">
-                  <span class="section-flag" aria-hidden="true"></span>
-                  <div class="acc-meta">
-                    <div class="acc-title">Остатки</div>
-                    <div class="acc-sub">Пороги, уведомления, приоритет</div>
-                  </div>
-                </div>
-                <span class="chev" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-                </span>
-              </button>
-
-              <div class="acc-body" data-acc-body="ozon-stock" data-open="false">
-                <div class="market-services">
-                  <article class="card">
-                    <div class="card-head">
-                      <div class="card-head-top"><h3>Отслеживание остатков</h3></div>
-                      <div class="badges"><span class="badge ozon">Ozon</span></div>
-                    </div>
-                    <p>Пороги по SKU и уведомления о риске OOS</p>
-                    <div class="actions">
-                      <span class="btn outline small disabled">В разработке</span>
-                    </div>
-                  </article>
-
-                  <article class="card">
-                    <div class="card-head">
-                      <div class="card-head-top"><h3>Планирование поставок</h3></div>
-                      <div class="badges"><span class="badge ozon">Ozon</span></div>
                     </div>
                     <p>Черновики поставок по продажам и остаткам</p>
                     <div class="actions">
@@ -970,8 +839,7 @@
 
     /**
      * Section 3 accordions:
-     * - wide (2 columns): independent one-open per marketplace panel
-     * - narrow (1 column): dependent one-open for the whole grid
+     * теперь только WB, поэтому логика упрощена: one-open внутри WB
      */
     function resetAccordionButtons(scopeEl){
       const btns = $$('[data-acc]', scopeEl);
@@ -1007,10 +875,8 @@
     function setupAccordionsByWidth(){
       const grid = $("#marketGrid");
       const wb = document.querySelector('[data-accordion-scope="wb"]');
-      const ozon = document.querySelector('[data-accordion-scope="ozon"]');
 
       resetAccordionButtons(wb);
-      resetAccordionButtons(ozon);
 
       const stackBreak = getComputedStyle(document.documentElement).getPropertyValue('--stack-break').trim() || '560px';
       const isNarrow = window.matchMedia(`(max-width: ${stackBreak})`).matches;
@@ -1020,9 +886,7 @@
         setupOneOpen(grid);
       } else {
         closeAllWithin(wb);
-        closeAllWithin(ozon);
         setupOneOpen(wb);
-        setupOneOpen(ozon);
       }
     }
 
@@ -1034,4 +898,3 @@
   </script>
 </body>
 </html>
-
