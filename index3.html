@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AllGoods — автоматизация продавцов маркетплейсов</title>
+
+  <style>
+    :root{
+      --accent: #27e28a;
+
+      --bg: #0b0b10;
+      --panel: #10101a;
+
+      --text: #f2f3f7;
+      --muted:#b7bccb;
+
+      --line: rgba(255,255,255,.10);
+      --line2: rgba(255,255,255,.18);
+
+      --radius: 26px;
+      --shadow: 0 26px 90px rgba(0,0,0,.58);
+
+      --fs-base: 18px;
+      --fs-small: 15px;
+      --fs-h2: 28px;
+      --fs-card-title: 20px;
+
+      --pad: 28px;
+
+      --nav-h: 66px;
+      --max: 1400px;
+
+      --icon-btn: 38px;
+      --icon-size: 18px;
+
+      --stack-break: 560px;
+    }
+
+    /* (1) максимум 2 шрифта: используем один системный стек, без импортов */
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      font-size: var(--fs-base);
+    }
+    a{ color:inherit; text-decoration:none; }
+    button{ font-family:inherit; }
+
+    /* ================= Sticky header ================= */
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      height: var(--nav-h);
+      display:flex;
+      align-items:center;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: rgba(11,11,16,.88);
+      backdrop-filter: blur(10px);
+    }
+    .topbar-inner{
+      width: 100%;
+      padding: 0 22px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+      max-width: var(--max);
+      margin: 0 auto;
+    }
+    @media (max-width: 920px){
+      .topbar-inner{ padding: 0 14px; }
+    }
+
+    .brand-mini{
+      display:flex;
+      align-items:center;
+      min-width: 0;
+    }
+    .brand-mini img{
+      height: 34px;
+      width: auto;
+      object-fit: contain;
+      border-radius: 10px;
+      background: transparent;
+      display:block;
+    }
+
+    .top-actions{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line2);
+      background: var(--panel);
+      color: var(--text);
+      font-size: var(--fs-small);
+      cursor:pointer;
+      transition: filter .16s ease, transform .06s ease, background .16s ease;
+      user-select:none;
+    }
+    .btn:hover{ filter: brightness(1.06); }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.primary{
+      background: var(--accent);
+      border-color: transparent;
+      color: #08140f;
+      font-weight: 900;
+      letter-spacing:.1px;
+    }
+
+    .btn.outline{
+      background: transparent;
+      border: 1px dashed rgba(255,255,255,.28);
+      color: rgba(242,243,247,.82);
+      font-weight: 650;
+    }
+    .btn.outline:hover{ filter:none; background: rgba(255,255,255,.03); }
+
+    .btn.small{ padding: 11px 13px; font-size: var(--fs-small); }
+    .btn.disabled{ opacity:.9; cursor:not-allowed; pointer-events:none; }
+
+    .btn.icon{
+      width: var(--icon-btn);
+      height: var(--icon-btn);
+      padding: 0;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      background: rgba(16,16,26,.55);
+    }
+    .btn.icon svg{
+      width: var(--icon-size);
+      height: var(--icon-size);
+      stroke: rgba(242,243,247,.95);
+      stroke-width: 2.6;
+      fill:none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .btn.icon.primary{
+      background: var(--accent);
+      border-color: transparent;
+    }
+    .btn.icon.primary svg{ stroke: #08140f; }
+
+    /* ================= Burger dropdown ================= */
+    .burger-pop{
+      position: fixed;
+      z-index: 1100;
+      display:none;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(11,11,16,.94);
+      backdrop-filter: blur(12px);
+      border-radius: 18px;
+      box-shadow: 0 30px 90px rgba(0,0,0,.62);
+      overflow:hidden;
+    }
+    .burger-pop[data-open="true"]{ display:block; }
+    .burger-pop .list{
+      padding: 10px;
+      display:grid;
+      gap: 10px;
+    }
+    .burger-pop a{
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      padding: 14px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(16,16,26,.55);
+      font-size: 16px;
+      color: rgba(242,243,247,.92);
+    }
+
+    /* Layout */
+    .wrap{
+      width:100%;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 18px 22px 64px;
+    }
+    @media (max-width: 920px){
+      .wrap{ padding: 16px 14px 56px; }
+    }
+    section[id], main[id]{ scroll-margin-top: calc(var(--nav-h) + 18px); }
+
+    /* ========================= HERO (2) минималистично + продающе ========================= */
+    .hero{
+      margin-top: 18px;
+      border-radius: calc(var(--radius) + 6px);
+      overflow:hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,.10);
+
+      /* Обигрываем логотип: чистый фон + зелёный акцент (без “лишних” блоков) */
+      background:
+        radial-gradient(900px 460px at 18% 18%, rgba(39,226,138,.22), transparent 60%),
+        radial-gradient(780px 420px at 88% 0%, rgba(39,226,138,.10), transparent 58%),
+        linear-gradient(180deg, #121220, #0b0b12);
+    }
+
+    .hero-inner{
+      padding: 40px 36px 34px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+    }
+    @media (max-width: 980px){
+      .hero-inner{ padding: 26px 16px 22px; }
+    }
+
+    .hero-content{
+      width: 100%;
+      max-width: 980px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 14px;
+    }
+
+    /* Лого — крупно и запоминается */
+    .hero-logo{
+      width: min(720px, 92%);
+      height: auto;
+      object-fit: contain;
+      display:block;
+      background: transparent;
+      border-radius: 18px;
+
+      /* лёгкая “сцена” под логотип, но без дополнительных элементов */
+      filter: drop-shadow(0 24px 70px rgba(0,0,0,.55));
+    }
+
+    .hero-h1{
+      margin: 4px 0 0;
+      font-size: 34px;
+      line-height: 1.12;
+      letter-spacing: .1px;
+      font-weight: 950;
+      max-width: 46ch;
+    }
+    @media (max-width: 520px){
+      .hero-h1{ font-size: 28px; }
+    }
+    .hero-h1 b{ color: var(--accent); }
+
+    .hero-sub{
+      margin:0;
+      font-size: 20px;
+      color: rgba(242,243,247,.86);
+      max-width: 74ch;
+    }
+    @media (max-width: 520px){
+      .hero-sub{ font-size: 18px; }
+    }
+
+    .hero-note{
+      margin: 4px 0 0;
+      font-size: 15.5px;
+      color: rgba(242,243,247,.70);
+    }
+    .hero-note b{ color: rgba(242,243,247,.90); }
+
+    .hero-cta{
+      margin-top: 8px;
+      display:flex;
+      gap: 12px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    .btn.big{
+      padding: 14px 18px;
+      border-radius: 18px;
+      font-size: 16px;
+    }
+
+    /* ===================== Popular ===================== */
+    .popular{
+      margin-top: 18px;
+      border:1px solid var(--line);
+      background: #0f0f18;
+      border-radius: var(--radius);
+      padding: var(--pad);
+    }
+    .popular h2{
+      margin:0;
+      font-size: var(--fs-h2);
+      letter-spacing:.15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .popular p{
+      margin: 10px 0 0;
+      color: rgba(242,243,247,.82);
+      font-size: 18px;
+      max-width: 95ch;
+    }
+
+    .services{
+      display:grid;
+      gap: 16px;
+      grid-template-columns: repeat(12, 1fr);
+      margin-top: 18px;
+    }
+
+    .popular .card{ grid-column: span 3; }
+    @media (max-width: 1200px){ .popular .card{ grid-column: span 6; } }
+    @media (max-width: 560px){ .popular .card{ grid-column: span 12; } }
+
+    .card{
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: #10101a;
+      padding: 22px 22px 18px;
+      position:relative;
+      overflow:hidden;
+      min-height: 210px;
+    }
+    .card.featured{
+      border-color: rgba(39,226,138,.45);
+      box-shadow: 0 16px 48px rgba(0,0,0,.35);
+    }
+
+    .card-head{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap: 8px;
+    }
+    .card-head-top{
+      display:flex;
+      width:100%;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 14px;
+    }
+
+    .card h3{
+      margin:0;
+      font-size: var(--fs-card-title);
+      letter-spacing:.12px;
+      line-height: 1.25;
+    }
+    .card p{
+      margin: 12px 0 14px;
+      color: rgba(242,243,247,.82);
+      font-size: 17px;
+      max-width: 95ch;
+    }
+
+    .actions{
+      display:flex;
+      gap: 12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .badges{
+      display:flex;
+      gap: 8px;
+      justify-content:flex-start;
+    }
+    .badge{
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(12,12,18,.85);
+      color: rgba(242,243,247,.88);
+      letter-spacing:.02em;
+      white-space:nowrap;
+    }
+    .badge.wb{ border-color: rgba(149,92,255,.35); }
+    .badge.ozon{ border-color: rgba(120,180,255,.35); }
+
+    .popular .card{ display:flex; flex-direction:column; }
+    .popular .actions{ margin-top:auto; }
+    .popular .card h3{
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+      min-height: calc(1.25em * 2);
+    }
+    .popular .card p{
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+      min-height: calc(1.55em * 2);
+      margin-bottom: 14px;
+    }
+    .popular .badges{ flex-wrap:nowrap; overflow:hidden; }
+
+    /* ===================== Section 3 ===================== */
+    main{ margin-top: 18px; }
+
+    .market-grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+    .market-grid .panel{ grid-column: span 6; }
+    @media (max-width: 560px){ .market-grid .panel{ grid-column: span 12; } }
+
+    .panel{
+      border:1px solid var(--line);
+      background: #0f0f18;
+      border-radius: var(--radius);
+      overflow:hidden;
+    }
+
+    .panel-head{
+      padding: 20px 22px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      display:flex;
+      align-items:center;
+      gap: 14px;
+    }
+
+    .mp-logo{
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+      background: transparent;
+      display:block;
+      filter: none;
+      border-radius: 10px; /* скругление WB/Ozon */
+    }
+
+    .panel-title{
+      font-size: 22px;
+      font-weight: 950;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .panel-body{ padding: 14px 14px 18px; }
+
+    .section{
+      border:1px solid var(--line);
+      border-radius: 24px;
+      overflow:hidden;
+      background: #0b0b12;
+      margin-top: 14px;
+    }
+    .section:first-child{ margin-top: 0; }
+
+    .acc-btn{
+      width:100%;
+      text-align:left;
+      padding: 20px 20px;
+      border:0;
+      background: transparent;
+      color: var(--text);
+      cursor:pointer;
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 16px;
+    }
+    .acc-btn:hover{ background: rgba(255,255,255,.03); }
+
+    .acc-left{
+      display:flex;
+      align-items:center;
+      gap: 14px;
+      min-width:0;
+    }
+    .section-flag{
+      width: 14px;
+      height: 14px;
+      border-radius: 6px;
+      background: rgba(39,226,138,.85);
+      box-shadow: 0 0 0 8px rgba(39,226,138,.10);
+      flex: 0 0 auto;
+      opacity:.9;
+    }
+    .acc-meta{ min-width:0; }
+    .acc-title{
+      font-size: 20px;
+      font-weight: 950;
+      letter-spacing:.18px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .acc-sub{
+      font-size: 15.5px;
+      color: var(--muted);
+      margin-top: 4px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .chev{
+      width: 44px;
+      height: 44px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(12,12,20,.95);
+      display:grid;
+      place-items:center;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+      flex:0 0 auto;
+    }
+    .chev svg{
+      width: 20px;
+      height: 20px;
+      stroke: rgba(242,243,247,.92);
+      stroke-width: 2.6;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .acc-btn[aria-expanded="true"] .chev{
+      border-color: rgba(39,226,138,.34);
+      background: rgba(39,226,138,.14);
+      transform: rotate(180deg);
+    }
+
+    .acc-body{
+      border-top:1px solid var(--line);
+      padding: 16px 16px 18px;
+      display:none;
+    }
+    .acc-body[data-open="true"]{ display:block; }
+
+    .market-services{
+      display:grid;
+      gap: 16px;
+      grid-template-columns: repeat(12, 1fr);
+    }
+    .market-services .card{
+      grid-column: span 6;
+      min-height: 190px;
+    }
+    @media (max-width: 1279px){
+      .market-services .card{ grid-column: span 12; }
+    }
+    @media (min-width: 1280px){
+      .market-services .card{ grid-column: span 6; }
+    }
+
+    .market-services .card{ display:flex; flex-direction:column; }
+    .market-services .actions{ margin-top:auto; }
+    .market-services .card h3{
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+      min-height: calc(1.25em * 2);
+    }
+    .market-services .card p{
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+      min-height: calc(1.55em * 2);
+      margin-bottom: 14px;
+    }
+    .market-services .badges{ flex-wrap:nowrap; overflow:hidden; }
+
+    footer{
+      margin-top: 22px;
+      color: rgba(242,243,247,.62);
+      font-size: var(--fs-small);
+      padding: 0 6px;
+      text-align:center;
+    }
+
+    button:focus-visible, a:focus-visible{
+      outline: 3px solid rgba(39,226,138,.35);
+      outline-offset: 3px;
+      border-radius: 18px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Sticky header -->
+  <div class="topbar" role="banner">
+    <div class="topbar-inner">
+      <a class="brand-mini" href="#top" aria-label="На главную">
+        <img src="logo.png" alt="AllGoods" />
+      </a>
+
+      <div class="top-actions">
+        <a class="btn icon primary" href="/cabinet" aria-label="Личный кабинет" title="Личный кабинет">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 21a8 8 0 0 0-16 0"></path>
+            <path d="M12 13a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"></path>
+          </svg>
+        </a>
+
+        <button class="btn icon" id="burger" type="button" aria-expanded="false" aria-controls="burgerPop" aria-label="Открыть меню">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 7h14M5 12h14M5 17h14"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Burger dropdown -->
+  <div class="burger-pop" id="burgerPop" data-open="false" role="menu" aria-label="Главное меню">
+    <div class="list">
+      <a href="#top" data-close-pop role="menuitem"><span>Главная</span></a>
+      <a href="#popular" data-close-pop role="menuitem"><span>Популярное</span></a>
+      <a href="#marketplaces" data-close-pop role="menuitem"><span>Сервисы</span></a>
+    </div>
+  </div>
+
+  <div class="wrap" id="top">
+    <!-- HERO -->
+    <section class="hero" aria-label="AllGoods — главный экран">
+      <div class="hero-inner">
+        <div class="hero-content">
+          <img class="hero-logo" src="logo.png" alt="AllGoods" />
+
+          <h1 class="hero-h1">AllGoods — порядок в работе с WB и Ozon: <b>контроль</b>, <b>скорость</b>, <b>стабильность</b></h1>
+          <p class="hero-sub">Документы, остатки и подготовка поставок <b>в одном сервисе</b></p>
+          <p class="hero-note"><b>Упаковочный лист</b> доступен уже сейчас — попробуйте в один клик!</p>
+
+          <div class="hero-cta">
+            <a class="btn primary big" href="/signup">Начать</a>
+            <a class="btn outline big" href="#marketplaces">Наши сервисы</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Popular -->
+    <section class="popular" id="popular" aria-label="Самые популярные у клиентов">
+      <h2>Популярные у наших клиентов</h2>
+      <p>То, что быстрее всего окупает время: документы и контроль процессов</p>
+
+      <div class="services">
+        <article class="card featured">
+          <div class="card-head">
+            <div class="card-head-top">
+              <h3>Автоматическое создание упаковочного листа</h3>
+            </div>
+            <div class="badges">
+              <span class="badge wb">WB</span>
+            </div>
+          </div>
+          <p>Генерация упаковочного листа из данных поставки: быстро, одинаково, без ручных правок</p>
+          <div class="actions">
+            <a class="btn primary small" href="/packing-slip">Открыть</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <div class="card-head-top">
+              <h3>Отслеживание остатков и пороги</h3>
+            </div>
+            <div class="badges">
+              <span class="badge wb">WB</span>
+              <span class="badge ozon">Ozon</span>
+            </div>
+          </div>
+          <p>Пороги по SKU, уведомления, приоритет "что пополнить первым"</p>
+          <div class="actions">
+            <span class="btn outline small disabled">В разработке</span>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <div class="card-head-top">
+              <h3>Планирование поставок</h3>
+            </div>
+            <div class="badges">
+              <span class="badge wb">WB</span>
+            </div>
+          </div>
+          <p>Черновики поставок из продаж и остатков + проверка ошибок перед отправкой</p>
+          <div class="actions">
+            <span class="btn outline small disabled">В разработке</span>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <div class="card-head-top">
+              <h3>Синхронизация цен по правилам</h3>
+            </div>
+            <div class="badges">
+              <span class="badge ozon">Ozon</span>
+            </div>
+          </div>
+          <p>Округление, минимальная маржа, защита от “прыжков” и случайных обновлений</p>
+          <div class="actions">
+            <span class="btn outline small disabled">В разработке</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Services by marketplace -->
+    <main id="marketplaces" aria-label="WB и Ozon — разделы и сервисы">
+      <div class="market-grid" id="marketGrid">
+        <!-- WB -->
+        <section class="panel" data-market="wb">
+          <div class="panel-head">
+            <img class="mp-logo" src="wb.png" alt="Wildberries" />
+            <div class="panel-title">Wildberries</div>
+          </div>
+
+          <div class="panel-body" data-accordion-scope="wb">
+            <div class="section">
+              <button class="acc-btn" type="button" data-acc="wb-docs" aria-expanded="false">
+                <div class="acc-left">
+                  <span class="section-flag" aria-hidden="true"></span>
+                  <div class="acc-meta">
+                    <div class="acc-title">Документы</div>
+                    <div class="acc-sub">Печать, упаковка, контроль</div>
+                  </div>
+                </div>
+                <span class="chev" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
+              </button>
+
+              <div class="acc-body" data-acc-body="wb-docs" data-open="false">
+                <div class="market-services">
+                  <article class="card">
+                    <div class="card-head">
+                      <div class="card-head-top"><h3>Упаковочный лист</h3></div>
+                      <div class="badges"><span class="badge wb">WB</span></div>
+                    </div>
+                    <p>Загрузи данные поставки — получи упаковочный лист по шаблону</p>
+                    <div class="actions">
+                      <a class="btn primary small" href="/packing-slip">Открыть</a>
+                    </div>
+                  </article>
+
+                  <article class="card">
+                    <div class="card-head">
+                      <div class="card-head-top"><h3>Проверка комплектации заказа</h3></div>
+                      <div class="badges"><span class="badge wb">WB</span></div>
+                    </div>
+                    <p>Сверка позиций по сборке: подсветка расхождений и быстрые действия</p>
+                    <div class="actions">
+                      <span class="btn outline small disabled">В разработке</span>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <button class="acc-btn" type="button" data-acc="wb-stock" aria-expanded="false">
+                <div class="acc-left">
+                  <span class="section-flag" aria-hidden="true"></span>
+                  <div class="acc-meta">
+                    <div class="acc-title">Остатки</div>
+                    <div class="acc-sub">Пороги, уведомления, приоритет</div>
+                  </div>
+                </div>
+                <span class="chev" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
+              </button>
+
+              <div class="acc-body" data-acc-body="wb-stock" data-open="false">
+                <div class="market-services">
+                  <article class="card">
+                    <div class="card-head">
+                      <div class="card-head-top"><h3>Отслеживание остатков</h3></div>
+                      <div class="badges"><span class="badge wb">WB</span></div>
+                    </div>
+                    <p>Пороги по SKU и уведомления о риске OOS</p>
+                    <div class="actions">
+                      <span class="btn outline small disabled">В разработке</span>
+                    </div>
+                  </article>
+
+                  <article class="card">
+                    <div class="card-head">
+                      <div class="card-head-top"><h3>Планирование поставок</h3></div>
+                      <div class="badges"><span class="badge wb">WB</span></div>
+                    </div>
+                    <p>Черновики поставок по продажам и остаткам</p>
+                    <div class="actions">
+                      <span class="btn outline small disabled">В разработке</span>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- OZON -->
+        <section class="panel" data-market="ozon">
+          <div class="panel-head">
+            <img class="mp-logo" src="ozon.png" alt="Ozon" />
+            <div class="panel-title">Ozon</div>
+          </div>
+
+          <div class="panel-body" data-accordion-scope="ozon">
+            <div class="section">
+              <button class="acc-btn" type="button" data-acc="ozon-ops" aria-expanded="false">
+                <div class="acc-left">
+                  <span class="section-flag" aria-hidden="true"></span>
+                  <div class="acc-meta">
+                    <div class="acc-title">Операции</div>
+                    <div class="acc-sub">Заказы, статусы, контроль</div>
+                  </div>
+                </div>
+                <span class="chev" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
+              </button>
+
+              <div class="acc-body" data-acc-body="ozon-ops" data-open="false">
+                <div class="market-services">
+                  <article class="card">
+                    <div class="card-head">
+                      <div class="card-head-top"><h3>Умные статусы заказов</h3></div>
+                      <div class="badges"><span class="badge ozon">Ozon</span></div>
+                    </div>
+                    <p>Фильтры по “где застряло” + список проблемных заказов</p>
+                    <div class="actions">
+                      <span class="btn outline small disabled">В разработке</span>
+                    </div>
+                  </article>
+
+                  <article class="card">
+                    <div class="card-head">
+                      <div class="card-head-top"><h3>Синхронизация цен по правилам</h3></div>
+                      <div class="badges"><span class="badge ozon">Ozon</span></div>
+                    </div>
+                    <p>Округление, минимальная маржа, защита от случайных обновлений</p>
+                    <div class="actions">
+                      <span class="btn outline small disabled">В разработке</span>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <button class="acc-btn" type="button" data-acc="ozon-stock" aria-expanded="false">
+                <div class="acc-left">
+                  <span class="section-flag" aria-hidden="true"></span>
+                  <div class="acc-meta">
+                    <div class="acc-title">Остатки</div>
+                    <div class="acc-sub">Пороги, уведомления, приоритет</div>
+                  </div>
+                </div>
+                <span class="chev" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
+              </button>
+
+              <div class="acc-body" data-acc-body="ozon-stock" data-open="false">
+                <div class="market-services">
+                  <article class="card">
+                    <div class="card-head">
+                      <div class="card-head-top"><h3>Отслеживание остатков</h3></div>
+                      <div class="badges"><span class="badge ozon">Ozon</span></div>
+                    </div>
+                    <p>Пороги по SKU и уведомления о риске OOS</p>
+                    <div class="actions">
+                      <span class="btn outline small disabled">В разработке</span>
+                    </div>
+                  </article>
+
+                  <article class="card">
+                    <div class="card-head">
+                      <div class="card-head-top"><h3>Планирование поставок</h3></div>
+                      <div class="badges"><span class="badge ozon">Ozon</span></div>
+                    </div>
+                    <p>Черновики поставок по продажам и остаткам</p>
+                    <div class="actions">
+                      <span class="btn outline small disabled">В разработке</span>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      © <span id="year"></span> AllGoods
+    </footer>
+  </div>
+
+  <script>
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    $("#year").textContent = new Date().getFullYear();
+
+    /* Burger dropdown: ширина 320, но НИКОГДА не уезжает за экран (в т.ч. 320px viewport) */
+    const burger = $("#burger");
+    const pop = $("#burgerPop");
+    const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+    function placePop(){
+      const r = burger.getBoundingClientRect();
+      const gap = 10;
+      const safe = 12;
+
+      const fixedW = 320;
+      const maxW = Math.max(180, window.innerWidth - safe * 2);
+      const w = Math.min(fixedW, maxW);
+      pop.style.width = w + "px";
+
+      const preferredLeft = r.right - w; // right-align to burger
+      const left = clamp(preferredLeft, safe, window.innerWidth - w - safe);
+      const top = Math.min(window.innerHeight - safe, r.bottom + gap);
+
+      pop.style.left = left + "px";
+      pop.style.top = top + "px";
+    }
+
+    function setPop(open){
+      pop.dataset.open = open ? "true" : "false";
+      burger.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) placePop();
+    }
+
+    burger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setPop(!(pop.dataset.open === "true"));
+    });
+
+    document.addEventListener("click", (e) => {
+      const inside = pop.contains(e.target) || burger.contains(e.target);
+      if (!inside) setPop(false);
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setPop(false);
+    });
+
+    $$("[data-close-pop]").forEach(a => a.addEventListener("click", () => setPop(false)));
+
+    window.addEventListener("resize", () => { if (pop.dataset.open === "true") placePop(); });
+    window.addEventListener("scroll", () => { if (pop.dataset.open === "true") placePop(); }, { passive:true });
+
+    /**
+     * Section 3 accordions:
+     * - wide (2 columns): independent one-open per marketplace panel
+     * - narrow (1 column): dependent one-open for the whole grid
+     */
+    function resetAccordionButtons(scopeEl){
+      const btns = $$('[data-acc]', scopeEl);
+      btns.forEach(btn => {
+        const clone = btn.cloneNode(true);
+        btn.parentNode.replaceChild(clone, btn);
+      });
+    }
+    function closeAllWithin(rootEl){
+      $$('[data-acc]', rootEl).forEach(b => b.setAttribute("aria-expanded","false"));
+      $$('[data-acc-body]', rootEl).forEach(body => body.dataset.open = "false");
+    }
+    function setupOneOpen(rootEl){
+      const btns = $$('[data-acc]', rootEl);
+      btns.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute("data-acc");
+          const expanded = btn.getAttribute("aria-expanded") === "true";
+
+          closeAllWithin(rootEl);
+
+          if (!expanded) {
+            btn.setAttribute("aria-expanded","true");
+            const body = $(`[data-acc-body="${id}"]`, btn.parentElement);
+            if (body) body.dataset.open = "true";
+          }
+        });
+      });
+      $$('[data-acc-body]', rootEl).forEach(b => b.addEventListener("click", (e) => e.stopPropagation()));
+    }
+
+    function setupAccordionsByWidth(){
+      const grid = $("#marketGrid");
+      const wb = document.querySelector('[data-accordion-scope="wb"]');
+      const ozon = document.querySelector('[data-accordion-scope="ozon"]');
+
+      resetAccordionButtons(wb);
+      resetAccordionButtons(ozon);
+
+      const stackBreak = getComputedStyle(document.documentElement).getPropertyValue('--stack-break').trim() || '560px';
+      const isNarrow = window.matchMedia(`(max-width: ${stackBreak})`).matches;
+
+      if (isNarrow) {
+        closeAllWithin(grid);
+        setupOneOpen(grid);
+      } else {
+        closeAllWithin(wb);
+        closeAllWithin(ozon);
+        setupOneOpen(wb);
+        setupOneOpen(ozon);
+      }
+    }
+
+    setupAccordionsByWidth();
+    window.addEventListener("resize", () => {
+      clearTimeout(window.__acc_t);
+      window.__acc_t = setTimeout(setupAccordionsByWidth, 120);
+    });
+  </script>
+</body>
+</html>
